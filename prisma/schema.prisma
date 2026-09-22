@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+}
+
+model GatewayKey {
+  id          Int      @id @default(autoincrement())
+  name        String
+  keyHash     String   @unique
+  budgetLimit Decimal  @db.Decimal(12, 6)
+  spentAmount Decimal  @default(0) @db.Decimal(12, 6)
+  reservedAmount Decimal @default(0) @db.Decimal(12, 6)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  usageLogs UsageLog[]
+}
+
+model UsageLog {
+  id            Int      @id @default(autoincrement())
+  keyId         Int
+  provider      String
+  model         String
+  inputTokens   Int
+  outputTokens  Int
+  totalTokens   Int
+  estimatedCost Decimal  @db.Decimal(12, 6)
+  status        String
+  createdAt     DateTime @default(now())
+
+  gatewayKey GatewayKey @relation(fields: [keyId], references: [id])
+
+  @@index([keyId])
+  @@index([createdAt])
+}
